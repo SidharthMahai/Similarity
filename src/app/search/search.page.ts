@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-search',
@@ -7,9 +9,22 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SearchPage implements OnInit {
 word: string;
-  constructor() { }
+synonyms: any;
+
+  constructor(private http: HttpClient) { }
 
   ngOnInit() {
   }
 
+  find(){
+    if(this.word.length>=2)
+    {
+    this.http.get('https://api.datamuse.com/words?rel_syn=' + this.word).subscribe(result=>this.synonyms=result)
+    console.log(this.synonyms);
+    }
+    else
+    {
+      this.synonyms=null;
+    }
+  }
 }
