@@ -4,6 +4,8 @@ Similarity is a simplistic, progressive and prompt synonyms finder. Available in
 
 You can download the application for android here : https://drive.google.com/file/d/1wAireecS8MTeeXsEkFan0RmF_yb-k0m9/view?usp=sharing
 
+Website: https://similarityx.web.app/
+
 ![ss1](https://user-images.githubusercontent.com/82432397/116384815-d5490e80-a835-11eb-9610-195ecd5d4a0b.JPG)
 
 ![ss2](https://user-images.githubusercontent.com/82432397/116384821-d712d200-a835-11eb-94c6-e146c0c5128f.JPG)
