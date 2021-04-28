@@ -1,5 +1,6 @@
 import { Component, OnInit} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import {SpeechRecognition} from '@ionic-native/speech-recognition/ngx';
 
 
 @Component({
@@ -11,7 +12,7 @@ export class SearchPage implements OnInit {
 word: string;
 synonyms: any;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private speech: SpeechRecognition) { }
 
   ngOnInit() {
   }
@@ -27,4 +28,27 @@ synonyms: any;
       this.synonyms=null;
     }
   }
+
+  record()
+  {
+    this.speech.hasPermission().then((permission)=>
+    {
+      if(permission)
+      {
+        this.speech.startListening().subscribe((data)=>{
+          this.word=data[0];
+          this.find();
+        })
+      }
+      else{
+        this.speech.requestPermission().then((data)=>{
+          this.record();
+        })
+      }
+    })
+  }
+
+
+
+
 }
