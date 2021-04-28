@@ -36,6 +36,7 @@ synonyms: any;
       if(permission)
       {
         this.speech.startListening().subscribe((data)=>{
+          this.speech.stopListening();
           this.word=data[0];
           this.find();
         })
