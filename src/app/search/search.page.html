@@ -7,20 +7,20 @@
 <ion-content>
   <ion-card>
     <ion-card-header>
-      <ion-card-subtitle>Find the best synonyms</ion-card-subtitle>
+      <ion-card-subtitle>Find the ultimate synonyms</ion-card-subtitle>
       <ion-card-title>Search</ion-card-title>
     </ion-card-header>
 
     <ion-card-content>
       <ion-item>
-        <ion-label position="floating">Enter a word!</ion-label>
+        <ion-label position="floating">Enter a word here!</ion-label>
         <ion-input (ionChange)="find()" required type="text" [(ngModel)]="word"></ion-input>
         <ion-icon (click)="record()" name="mic-outline" slot="start"></ion-icon>
       </ion-item>
     </ion-card-content>
   </ion-card>
 
-  <ion-item lines="none" *ngFor="let syn of synonyms">
+  <ion-item *ngFor="let syn of synonyms">
   <div  *ngIf="this.synonyms"  >
     <ion-icon name="rocket-outline" slot="start"></ion-icon>
     <ion-chip color="secondary">
