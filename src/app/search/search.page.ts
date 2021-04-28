@@ -1,4 +1,4 @@
-import { Component, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {SpeechRecognition} from '@ionic-native/speech-recognition/ngx';
 
@@ -12,7 +12,7 @@ export class SearchPage implements OnInit {
 word: string;
 synonyms: any;
 
-  constructor(private http: HttpClient, private speech: SpeechRecognition) { }
+  constructor(private http: HttpClient, private speech: SpeechRecognition, private cd: ChangeDetectorRef) { }
 
   ngOnInit() {
   }
@@ -38,6 +38,7 @@ synonyms: any;
         this.speech.startListening().subscribe((data)=>{
           this.speech.stopListening();
           this.word=data[0];
+          this.cd.detectChanges();
           this.find();
         })
       }
