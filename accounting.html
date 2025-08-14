@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Personal Double-Entry Ledger (Single File)</title>
+<title>Personal Finance Ledger (Single File)</title>
 <style>
   :root{
     --bg:#0f172a; --panel:#111827; --muted:#94a3b8; --text:#e5e7eb;
@@ -23,7 +23,7 @@
   h2{margin:14px 0}
   .panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; margin:12px 0}
   .row{display:grid; grid-template-columns:repeat(12,1fr); gap:10px}
-  .row>.col-4{grid-column:span 4} .col-6{grid-column:span 6} .col-3{grid-column:span 3} .col-12{grid-column:span 12}
+  .col-3{grid-column:span 3} .col-4{grid-column:span 4} .col-6{grid-column:span 6} .col-12{grid-column:span 12}
   label{font-size:.9rem; color:var(--muted)}
   input, select, textarea{width:100%; padding:10px; border-radius:10px; border:1px solid var(--line); background:#0b1220; color:var(--text)}
   input[type="date"]{color-scheme:dark}
@@ -33,7 +33,7 @@
   tfoot td{border-top:1px solid var(--line); font-weight:600}
   .muted{color:var(--muted)}
   .pill{display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid var(--line); font-size:.75rem; color:#cbd5e1}
-  .type-Asset{background:#052e16; border-color:#064e3b} 
+  .type-Asset{background:#052e16; border-color:#064e3b}
   .type-Liability{background:#3f1d2b; border-color:#7f1d1d}
   .type-Equity{background:#1e293b; border-color:#334155}
   .type-Income{background:#0a2e4e; border-color:#1e40af}
@@ -45,19 +45,13 @@
   .btn.link{background:transparent; border:0; color:#93c5fd; cursor:pointer}
   .flex{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
   .spacer{flex:1}
-  .warn{color:#fbbf24}
-  .ok{color:#86efac}
-  .error{color:#fca5a5}
-  details{background:#0b1220; border:1px solid var(--line); border-radius:10px; padding:10px}
-  summary{cursor:pointer}
   .small{font-size:.85rem}
-  .code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.85rem}
 </style>
 </head>
 <body>
 <header>
   <div class="wrap bar">
-    <div class="brand">💼 Personal Ledger</div>
+    <div class="brand">💳 Personal Finance Ledger</div>
     <nav class="bar">
       <button data-tab="dashboard" class="active">Dashboard</button>
       <button data-tab="accounts">Accounts</button>
@@ -77,99 +71,56 @@
       <div class="row">
         <div class="col-4">
           <label>Total Assets</label>
-          <div id="dashAssets" class="h3" style="font-size:1.6rem; font-weight:700;">—</div>
+          <div id="dashAssets" style="font-size:1.6rem; font-weight:700;">—</div>
         </div>
         <div class="col-4">
           <label>Total Liabilities</label>
-          <div id="dashLiabilities" class="h3" style="font-size:1.6rem; font-weight:700;">—</div>
+          <div id="dashLiabilities" style="font-size:1.6rem; font-weight:700;">—</div>
         </div>
         <div class="col-4">
           <label>Net Worth</label>
-          <div id="dashEquity" class="h3" style="font-size:1.6rem; font-weight:700;">—</div>
+          <div id="dashEquity" style="font-size:1.6rem; font-weight:700;">—</div>
         </div>
-        <div class="col-12 small muted">Tip: net worth ≈ assets − liabilities. Income/expense affect equity through your transactions.</div>
+        <div class="col-12 small muted">Net worth ≈ assets − liabilities.</div>
       </div>
     </div>
+
     <div class="panel">
       <div class="flex">
-        <h2 style="margin-right:auto">Quick Add</h2>
-        <span class="small muted">fast entry for common cases</span>
+        <h2 style="margin-right:auto">Quick Add: Expense</h2>
+        <span class="small muted">debit an expense, credit a cash/bank</span>
       </div>
       <div class="row">
-        <div class="col-6">
-          <details open>
-            <summary><strong>Expense</strong> → credit a cash/bank account, debit an expense account</summary>
-            <div class="row" style="margin-top:10px">
-              <div class="col-3">
-                <label>Date</label>
-                <input id="qExpDate" type="date">
-              </div>
-              <div class="col-3">
-                <label>Amount</label>
-                <input id="qExpAmt" type="number" step="0.01" placeholder="0.00">
-              </div>
-              <div class="col-3">
-                <label>From (Cash/Bank)</label>
-                <select id="qExpFrom"></select>
-              </div>
-              <div class="col-3">
-                <label>To (Expense)</label>
-                <select id="qExpTo"></select>
-              </div>
-              <div class="col-12">
-                <label>Description</label>
-                <input id="qExpDesc" placeholder="e.g., Groceries">
-              </div>
-              <div class="col-12">
-                <button class="btn primary" id="addQuickExpense">Add Expense</button>
-              </div>
-            </div>
-          </details>
+        <div class="col-3">
+          <label>Date</label>
+          <input id="qExpDate" type="date">
         </div>
-        <div class="col-6">
-          <details open>
-            <summary><strong>Salary</strong> template (split)</summary>
-            <div class="row" style="margin-top:10px">
-              <div class="col-3">
-                <label>Date</label>
-                <input id="qSalDate" type="date">
-              </div>
-              <div class="col-3">
-                <label>Net Amount</label>
-                <input id="qSalAmt" type="number" step="0.01" placeholder="0.00">
-              </div>
-              <div class="col-6">
-                <label>To Account (Bank)</label>
-                <select id="qSalBank"></select>
-              </div>
-              <div class="col-12">
-                <label>Credits split (Income)</label>
-                <div class="small muted">Default: all credit to “Salary Income”. You can split into components by %, totals must be 100%.</div>
-                <div class="row">
-                  <div class="col-6"><input id="qSalPart1Name" placeholder="Salary Income"></div>
-                  <div class="col-3"><input id="qSalPart1Pct" type="number" step="0.01" placeholder="100"></div>
-                  <div class="col-3 small muted" style="display:flex;align-items:center;">%</div>
-                  <div class="col-6"><input id="qSalPart2Name" placeholder="Bonus (optional)"></div>
-                  <div class="col-3"><input id="qSalPart2Pct" type="number" step="0.01" placeholder="0"></div>
-                  <div class="col-3 small muted" style="display:flex;align-items:center;">%</div>
-                </div>
-              </div>
-              <div class="col-12">
-                <label>Description</label>
-                <input id="qSalDesc" placeholder="Monthly salary">
-              </div>
-              <div class="col-12">
-                <button class="btn primary" id="addSalary">Add Salary Transaction</button>
-              </div>
-            </div>
-          </details>
+        <div class="col-3">
+          <label>Amount</label>
+          <input id="qExpAmt" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="col-3">
+          <label>From (Cash/Bank)</label>
+          <select id="qExpFrom"></select>
+        </div>
+        <div class="col-3">
+          <label>To (Expense)</label>
+          <select id="qExpTo"></select>
+        </div>
+        <div class="col-12">
+          <label>Description</label>
+          <input id="qExpDesc" placeholder="e.g., Groceries">
+        </div>
+        <div class="col-12">
+          <button class="btn primary" id="addQuickExpense">Add Expense</button>
         </div>
       </div>
     </div>
+
     <div class="panel">
       <h2>Recent Transactions</h2>
       <table id="recentTbl">
-        <thead><tr><th style="width:110px">Date</th><th>Description</th><th>Lines</th><th class="right">Amount</th></tr></thead>
+        <thead><tr><th style="width:110px">Date</th><th>Description</th><th>Type</th><th>Lines</th><th class="right">Amount</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -178,13 +129,13 @@
   <!-- ACCOUNTS -->
   <section id="accounts">
     <div class="panel">
-      <h2>Chart of Accounts</h2>
+      <h2>Accounts</h2>
       <div class="row">
-        <div class="col-3">
+        <div class="col-4">
           <label>Account Name</label>
-          <input id="accName" placeholder="e.g., Checking, Cash, Rent Expense">
+          <input id="accName" placeholder="e.g., Checking, Cash, Credit Card, Rent, Groceries">
         </div>
-        <div class="col-3">
+        <div class="col-4">
           <label>Type</label>
           <select id="accType">
             <option>Asset</option>
@@ -194,17 +145,16 @@
             <option>Expense</option>
           </select>
         </div>
-        <div class="col-3">
+        <div class="col-4">
           <label>Opening Balance (optional)</label>
           <input id="accOpen" type="number" step="0.01" placeholder="0.00">
         </div>
-        <div class="col-3">
-          <label>&nbsp;</label>
+        <div class="col-12">
           <button class="btn primary" id="addAccount">Add Account</button>
         </div>
       </div>
       <div class="small muted" style="margin-top:8px">
-        Opening balances post a balancing entry to “Opening Equity”. Edit later in Transactions if needed.
+        Opening balances post a balancing entry to “Opening Equity”.
       </div>
       <table id="acctTbl">
         <thead><tr><th>Name</th><th>Type</th><th class="right">Balance</th><th></th></tr></thead>
@@ -223,14 +173,24 @@
           <label>Date</label>
           <input id="txDate" type="date">
         </div>
-        <div class="col-9">
+        <div class="col-6">
           <label>Description</label>
           <input id="txDesc" placeholder="e.g., Grocery run, Rent, Salary August">
+        </div>
+        <div class="col-3">
+          <label>Type</label>
+          <select id="txType">
+            <option>Expense</option>
+            <option>Income</option>
+            <option>Transfer</option>
+            <option>Adjustment</option>
+            <option>Other</option>
+          </select>
         </div>
       </div>
       <div style="margin-top:10px">
         <table id="entryTbl">
-          <thead><tr><th style="width:38%">Account</th><th style="width:18%" class="right">Debit</th><th style="width:18%" class="right">Credit</th><th style="width:18%">Type</th><th style="width:8%"></th></tr></thead>
+          <thead><tr><th style="width:38%">Account</th><th style="width:18%" class="right">Debit</th><th style="width:18%" class="right">Credit</th><th style="width:18%">Acct Type</th><th style="width:8%"></th></tr></thead>
           <tbody></tbody>
           <tfoot>
             <tr><td class="right">Totals</td><td class="right" id="debitTot">0.00</td><td class="right" id="creditTot">0.00</td><td colspan="2"></td></tr>
@@ -252,54 +212,77 @@
         <div class="spacer"></div>
         <label class="small muted">Filter: </label>
         <input id="fltText" placeholder="search text" style="max-width:180px">
+        <select id="fltType">
+          <option value="">Any type</option>
+          <option>Expense</option><option>Income</option><option>Transfer</option><option>Adjustment</option><option>Other</option>
+        </select>
         <input id="fltFrom" type="date" title="From">
         <input id="fltTo" type="date" title="To">
         <button class="btn" id="applyFilter">Apply</button>
         <button class="btn" id="clearFilter">Clear</button>
       </div>
       <table id="txTbl">
-        <thead><tr><th style="width:110px">Date</th><th>Description</th><th>Lines</th><th class="right">Amount</th><th></th></tr></thead>
+        <thead><tr><th style="width:110px">Date</th><th>Description</th><th>Type</th><th>Lines</th><th class="right">Amount</th><th></th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
   </section>
 
-  <!-- REPORTS -->
+  <!-- REPORTS (personal finance focused) -->
   <section id="reports">
     <div class="panel">
       <div class="flex">
-        <h2>Reports</h2>
+        <h2>Personal Reports</h2>
         <div class="spacer"></div>
-        <label class="small muted">As of / Range: </label>
+        <label class="small muted">Range: </label>
         <input id="repFrom" type="date">
         <input id="repTo" type="date">
+        <label class="small muted">Account Statement for:</label>
+        <select id="repAccount"></select>
         <button class="btn" id="refreshReports">Refresh</button>
       </div>
     </div>
+
     <div class="panel">
-      <h3>Trial Balance</h3>
-      <table id="trialTbl">
-        <thead><tr><th>Account</th><th class="right">Debit</th><th class="right">Credit</th></tr></thead>
+      <h3>Spending by Category (Expense accounts)</h3>
+      <table id="spendTbl">
+        <thead><tr><th>Expense Category</th><th class="right">Amount</th></tr></thead>
         <tbody></tbody>
-        <tfoot><tr><td class="right">Totals</td><td class="right" id="trialDeb">0.00</td><td class="right" id="trialCre">0.00</td></tr></tfoot>
+        <tfoot><tr><td class="right">Total Expenses</td><td class="right" id="spendTot">0.00</td></tr></tfoot>
       </table>
     </div>
+
     <div class="panel">
-      <h3>Income Statement</h3>
-      <table id="plTbl">
-        <thead><tr><th>Category</th><th class="right">Amount</th></tr></thead>
+      <h3>Income by Category (Income accounts)</h3>
+      <table id="incTbl">
+        <thead><tr><th>Income Category</th><th class="right">Amount</th></tr></thead>
         <tbody></tbody>
-        <tfoot><tr><td class="right">Net Income</td><td class="right" id="plNet">0.00</td></tr></tfoot>
+        <tfoot><tr><td class="right">Total Income</td><td class="right" id="incTot">0.00</td></tr></tfoot>
       </table>
     </div>
+
     <div class="panel">
-      <h3>Balance Sheet (as of date)</h3>
-      <table id="bsTbl">
-        <thead><tr><th>Category</th><th class="right">Amount</th></tr></thead>
+      <h3>Monthly Summary (last 12 months)</h3>
+      <table id="monTbl">
+        <thead><tr><th>Month</th><th class="right">Income</th><th class="right">Expenses</th><th class="right">Net</th></tr></thead>
         <tbody></tbody>
-        <tfoot><tr><td class="right">Assets − Liabilities = Equity</td><td class="right" id="bsCheck">—</td></tr></tfoot>
       </table>
-      <div class="small muted">Balance sheet uses transactions up to the “To” date.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Account Statement (running balance)</h3>
+      <table id="stmtTbl">
+        <thead><tr><th style="width:110px">Date</th><th>Description</th><th class="right">Debit</th><th class="right">Credit</th><th class="right">Balance</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h3>Net Worth Trend (month-end)</h3>
+      <table id="nwTbl">
+        <thead><tr><th>Month</th><th class="right">Net Worth</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
   </section>
 
@@ -308,37 +291,23 @@
     <div class="panel">
       <h2>Import / Export</h2>
       <details open>
-        <summary><strong>Export</strong></summary>
+        <summary><strong>Export one Excel file (multi-sheet)</strong></summary>
         <div class="flex" style="margin-top:10px">
-          <button class="btn" id="exportJSON">Export JSON (backup)</button>
-          <button class="btn" id="exportCSV">Export CSV (Excel-friendly)</button>
-          <span class="small muted">CSV produces <em>accounts.csv</em> and <em>transactions.csv</em> with multi-line entries flattened.</span>
+          <button class="btn" id="exportWorkbook">Export Excel workbook (.xml)</button>
+          <span class="small muted">Opens in Excel as a single workbook with multiple sheets.</span>
         </div>
       </details>
       <details style="margin-top:12px">
-        <summary><strong>Import</strong></summary>
+        <summary><strong>Import / Backup</strong></summary>
         <div class="small muted" style="margin:8px 0">
-          You can import a JSON backup from this app, or CSV saved from Excel. CSV format:
-          <div class="code" style="white-space:pre; overflow:auto; background:#0b1220; padding:8px; border-radius:8px; margin-top:6px">
-accounts.csv:
-name,type
-Checking,Asset
-Cash,Asset
-Salary Income,Income
-Groceries,Expense
-
-transactions.csv:
-date,description,lines_json
-2025-08-01,Salary August,"[{""account"":""Checking"",""debit"":3000},{""account"":""Salary Income"",""credit"":3000}]"
-2025-08-02,Groceries,"[{""account"":""Groceries"",""debit"":120.50},{""account"":""Checking"",""credit"":120.50}]"
-          </div>
+          Import a JSON backup or CSV (Accounts or Transactions). CSV format is the same described earlier; Transactions CSV uses a <code>lines_json</code> column.
         </div>
         <div class="flex" style="margin-top:8px">
           <label class="btn">
             <input id="importFile" type="file" hidden>
             Import JSON / CSV
           </label>
-          <button class="btn danger" id="wipeAll">Danger: Wipe All Data</button>
+          <button class="btn danger" id="wipeAll">Wipe All Data</button>
         </div>
       </details>
     </div>
@@ -347,18 +316,13 @@ date,description,lines_json
   <!-- HELP -->
   <section id="help">
     <div class="panel">
-      <h2>How this works (super short)</h2>
+      <h2>Quick guide</h2>
       <ul>
-        <li>Double-entry: every transaction has total debits = total credits.</li>
-        <li>Assets/Expenses ↑ with debits, Liabilities/Equity/Income ↑ with credits.</li>
-        <li>For expenses: debit <em>Expense</em> account and credit your <em>Asset</em> (Cash/Bank).</li>
-        <li>For salary: debit your <em>Asset</em> (Bank) and credit <em>Income</em> (Salary Income).</li>
-      </ul>
-      <h3>Tips</h3>
-      <ul>
-        <li>Use <b>Quick Add</b> for daily expenses and salary splits.</li>
-        <li>Opening balances: add accounts with an opening amount; balancing entry goes to <em>Opening Equity</em>.</li>
-        <li>Excel: use <b>Export CSV</b> to open in Excel; save from Excel as CSV and use <b>Import</b> here.</li>
+        <li><b>Types:</b> Expense for spending, Income for salary/interest, Transfer for moving money (e.g., bank ↔ wallet), Adjustment for corrections.</li>
+        <li>Every transaction balances: total debits = total credits.</li>
+        <li>Expense: debit an Expense account, credit your cash/bank Asset.</li>
+        <li>Income: debit your Asset (bank), credit an Income account.</li>
+        <li>Transfers: Asset→Asset or Asset→Liability etc. Use Type=Transfer for easy filtering.</li>
       </ul>
     </div>
   </section>
@@ -374,7 +338,7 @@ const clone = obj => JSON.parse(JSON.stringify(obj));
 const id = () => Math.random().toString(36).slice(2,9);
 
 /* ------------ Storage ------------ */
-const DBKEY = 'simpleLedger.v1';
+const DBKEY = 'pfLedger.v1';
 let db = loadDB();
 function loadDB(){
   let d = localStorage.getItem(DBKEY);
@@ -384,7 +348,8 @@ function loadDB(){
       accounts:[
         {name:'Checking', type:'Asset'},
         {name:'Cash', type:'Asset'},
-        {name:'Salary Income', type:'Income'},
+        {name:'Credit Card', type:'Liability'},
+        {name:'Salary', type:'Income'},
         {name:'Groceries', type:'Expense'},
         {name:'Opening Equity', type:'Equity'}
       ],
@@ -419,11 +384,9 @@ function addAccountRow(a){
   tr.innerHTML=`<td>${a.name}</td>
     <td><span class="pill type-${a.type}">${a.type}</span></td>
     <td class="right">${fmt(bal)}</td>
-    <td class="right">
-      <button class="btn link" data-del="${a.name}">delete</button>
-    </td>`;
+    <td class="right"><button class="btn link" data-del="${a.name}">delete</button></td>`;
   tr.querySelector('[data-del]').onclick=()=>{
-    if(confirm('Delete account "'+a.name+'"? Only allowed if not used in transactions.')){
+    if(confirm('Delete account "'+a.name+'"? Only if unused in transactions.')){
       if(db.transactions.some(t=>t.lines.some(l=>l.account===a.name))){
         alert('Account used in transactions; cannot delete.');
       }else{
@@ -439,12 +402,11 @@ function refreshAccounts(){
   db.accounts.forEach(addAccountRow);
   const net = sumByType('Asset') - sumByType('Liability');
   $('#networthCell').textContent = fmt(net);
-  // populate selects
-  for(const sel of [$('#qExpFrom'), $('#qExpTo'), $('#qSalBank')]) sel.innerHTML='';
+  // populate quick/filters/selects
+  $('#qExpFrom').innerHTML=''; $('#qExpTo').innerHTML=''; $('#repAccount').innerHTML='';
   accountNames('Asset').forEach(n=>$('#qExpFrom').append(new Option(n,n)));
   accountNames('Expense').forEach(n=>$('#qExpTo').append(new Option(n,n)));
-  accountNames('Asset').forEach(n=>$('#qSalBank').append(new Option(n,n)));
-  // transaction editor account selects will be populated per-row
+  db.accounts.forEach(a=>$('#repAccount').append(new Option(a.name,a.name)));
 }
 $('#addAccount').onclick=()=>{
   const name=$('#accName').value.trim();
@@ -454,12 +416,11 @@ $('#addAccount').onclick=()=>{
   if(db.accounts.some(a=>a.name.toLowerCase()===name.toLowerCase())) return alert('Account already exists.');
   db.accounts.push({name, type});
   if(open && !isNaN(open)){
-    // Opening balance: post a transaction between the account and Opening Equity.
-    const isDebit = (type==='Asset'||type==='Expense'); // increase with debit
+    const isDebit = (type==='Asset'||type==='Expense');
     const lines = isDebit
       ? [{account:name, debit:open},{account:'Opening Equity', credit:open}]
       : [{account:'Opening Equity', debit:open},{account:name, credit:open}];
-    db.transactions.push({id:id(), date:todayISO(), description:`Opening balance for ${name}`, lines});
+    db.transactions.push({id:id(), date:todayISO(), type:'Adjustment', description:`Opening balance for ${name}`, lines});
   }
   saveDB();
   $('#accName').value=''; $('#accOpen').value='';
@@ -468,7 +429,6 @@ $('#addAccount').onclick=()=>{
 
 /* ------------ Balances & math ------------ */
 function accountBalance(name, upToDate=null){
-  // positive means normal-balance side (Assets/Expenses debit, others credit) netted
   const acc = db.accounts.find(a=>a.name===name);
   if(!acc) return 0;
   let deb=0, cre=0;
@@ -482,29 +442,27 @@ function accountBalance(name, upToDate=null){
         }
       });
     });
-  // For Assets/Expenses, natural balance is debit (deb - cre); else (cre - deb)
   if(acc.type==='Asset' || acc.type==='Expense') return deb - cre;
   return cre - deb;
 }
 function sumByType(type, upToDate=null){
   return db.accounts
     .filter(a=>a.type===type)
-    .map(a=>Math.max(0, accountBalance(a.name, upToDate))) // show positive side only for sum
+    .map(a=>Math.max(0, accountBalance(a.name, upToDate)))
     .reduce((a,b)=>a+b,0);
 }
 
 /* ------------ Transactions UI ------------ */
-function emptyLine(){
-  return {account: accountNames()[0]||'', debit:null, credit:null};
-}
+function emptyLine(){ return {account: accountNames()[0]||'', debit:null, credit:null}; }
 function addEntryRow(line){
   const tr=document.createElement('tr');
   const opts = db.accounts.map(a=>`<option value="${a.name}">${a.name}</option>`).join('');
+  const accObj = db.accounts.find(a=>a.name===line.account) || db.accounts[0] || {type:'Asset'};
   tr.innerHTML=`
     <td><select class="accSel">${opts}</select></td>
     <td class="right"><input class="debit" type="number" step="0.01" placeholder="0.00"></td>
     <td class="right"><input class="credit" type="number" step="0.01" placeholder="0.00"></td>
-    <td><span class="pill type-${(db.accounts.find(a=>a.name===line.account)||{type:'Asset'}).type}">${(db.accounts.find(a=>a.name===line.account)||{type:'Asset'}).type}</span></td>
+    <td><span class="pill type-${accObj.type}">${accObj.type}</span></td>
     <td class="right"><button class="btn link delLine">remove</button></td>`;
   $('#entryTbl tbody').appendChild(tr);
   const accSel = tr.querySelector('.accSel');
@@ -537,27 +495,26 @@ function computeEntryTotals(){
   $('#balTot').textContent=fmt(bal);
   const m=$('#balanceMsg');
   if(d===0 && c===0){ m.textContent='Debits must equal credits.'; m.className='small muted'; }
-  else if(Math.abs(bal)<0.005){ m.textContent='Balanced ✓'; m.className='small ok'; }
-  else { m.textContent='Not balanced'; m.className='small warn'; }
+  else if(Math.abs(bal)<0.005){ m.textContent='Balanced ✓'; m.className='small'; }
+  else { m.textContent='Not balanced'; m.className='small'; }
 }
 $('#postTx').onclick=()=>{
   const date=$('#txDate').value || todayISO();
   const desc=$('#txDesc').value.trim()||'(no description)';
+  const ttype=$('#txType').value || 'Other';
   const lines=[];
-  const usedAccounts=[];
   let d=0,c=0;
   $$('#entryTbl tbody tr').forEach(tr=>{
     const acc=tr.querySelector('.accSel').value;
     const deb=parseFloat(tr.querySelector('.debit').value||'0');
     const cre=parseFloat(tr.querySelector('.credit').value||'0');
-    if(deb>0){ lines.push({account:acc, debit:+deb.toFixed(2)}); d+=deb; usedAccounts.push(acc); }
-    if(cre>0){ lines.push({account:acc, credit:+cre.toFixed(2)}); c+=cre; usedAccounts.push(acc); }
+    if(deb>0){ lines.push({account:acc, debit:+deb.toFixed(2)}); d+=deb; }
+    if(cre>0){ lines.push({account:acc, credit:+cre.toFixed(2)}); c+=cre; }
   });
   if(lines.length<2) return alert('Need at least two lines.');
   if(Math.abs(d-c)>0.005) return alert('Debits and credits are not equal.');
-  db.transactions.push({id:id(), date, description:desc, lines});
+  db.transactions.push({id:id(), date, type:ttype, description:desc, lines});
   saveDB();
-  // reset
   $('#txDesc').value=''; $('#txDate').value='';
   $('#entryTbl tbody').innerHTML='';
   for(let i=0;i<2;i++) addEntryRow(emptyLine());
@@ -566,15 +523,16 @@ $('#postTx').onclick=()=>{
 };
 function renderTxRow(t){
   const tr=document.createElement('tr');
-  const amt = t.lines.reduce((a,l)=>a+(l.debit||l.credit||0),0);
+  const amt = t.lines.reduce((a,l)=>a+(l.debit||l.credit||0),0)/2;
   const linesTxt = t.lines.map(l=>{
     const side = l.debit?'Dr':'Cr';
     return `${l.account} ${side} ${fmt(l.debit||l.credit||0)}`;
   }).join('; ');
   tr.innerHTML=`<td>${t.date}</td>
     <td>${t.description||''}</td>
+    <td>${t.type||''}</td>
     <td class="small muted">${linesTxt}</td>
-    <td class="right">${fmt(amt/2)}</td>
+    <td class="right">${fmt(amt)}</td>
     <td class="right">
       <button class="btn link" data-edit="${t.id}">edit</button>
       <button class="btn link" data-del="${t.id}">delete</button>
@@ -598,16 +556,16 @@ function editTransaction(txId){
   $('#transactions').classList.add('active');
   $('#txDate').value = t.date;
   $('#txDesc').value = t.description||'';
+  $('#txType').value = t.type||'Other';
   $('#entryTbl tbody').innerHTML='';
   t.lines.forEach(addEntryRow);
   computeEntryTotals();
-  // Replace post behavior for single save
   $('#postTx').textContent='Save Changes';
   const origHandler = $('#postTx').onclick;
   $('#postTx').onclick=()=>{
-    // construct new lines
     const date=$('#txDate').value || todayISO();
     const desc=$('#txDesc').value.trim()||'(no description)';
+    const ttype=$('#txType').value || 'Other';
     const lines=[]; let d=0,c=0;
     $$('#entryTbl tbody tr').forEach(tr=>{
       const acc=tr.querySelector('.accSel').value;
@@ -618,10 +576,8 @@ function editTransaction(txId){
     });
     if(lines.length<2) return alert('Need at least two lines.');
     if(Math.abs(d-c)>0.005) return alert('Debits and credits are not equal.');
-    // save
-    t.date=date; t.description=desc; t.lines=lines;
+    t.date=date; t.description=desc; t.type=ttype; t.lines=lines;
     saveDB(); refreshAll();
-    // restore
     $('#postTx').textContent='Post Transaction';
     $('#postTx').onclick=origHandler;
     $('#entryTbl tbody').innerHTML='';
@@ -632,76 +588,174 @@ function editTransaction(txId){
 
 /* ------------ Filters ------------ */
 $('#applyFilter').onclick=refreshTransactions;
-$('#clearFilter').onclick=()=>{ $('#fltText').value=''; $('#fltFrom').value=''; $('#fltTo').value=''; refreshTransactions(); };
-
-/* ------------ Reports ------------ */
-function refreshReports(){
-  const from=$('#repFrom').value||null;
-  const to=$('#repTo').value||null;
-
-  // Trial balance (range)
-  const sumD={}, sumC={};
-  const txs = db.transactions.filter(t => (!from||t.date>=from) && (!to||t.date<=to));
-  txs.forEach(t=>{
-    t.lines.forEach(l=>{
-      if(l.debit){ sumD[l.account]=(sumD[l.account]||0)+l.debit; }
-      if(l.credit){ sumC[l.account]=(sumC[l.account]||0)+l.credit; }
-    });
-  });
-  const tbTbody=$('#trialTbl tbody'); tbTbody.innerHTML='';
-  const set=new Set([...Object.keys(sumD),...Object.keys(sumC)]);
-  let td=0, tc=0;
-  [...set].sort().forEach(acc=>{
-    const d=+((sumD[acc]||0).toFixed(2)), c=+((sumC[acc]||0).toFixed(2));
-    const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${acc}</td><td class="right">${fmt(d)}</td><td class="right">${fmt(c)}</td>`;
-    tbTbody.appendChild(tr);
-    td+=d; tc+=c;
-  });
-  $('#trialDeb').textContent=fmt(td); $('#trialCre').textContent=fmt(tc);
-
-  // P&L (range): Income positive (credits), Expenses positive (debits)
-  const plBody=$('#plTbl tbody'); plBody.innerHTML='';
-  let income=0, expenses=0;
-  db.accounts.filter(a=>a.type==='Income').forEach(a=>{
-    // income over range is sum of credits - debits on income accounts within range
-    let s=0; txs.forEach(t=>t.lines.forEach(l=>{ if(l.account===a.name){ s += (l.credit||0) - (l.debit||0); }}));
-    if(Math.abs(s)>0.0001){ const tr=document.createElement('tr'); tr.innerHTML=`<td>${a.name}</td><td class="right">${fmt(s)}</td>`; plBody.appendChild(tr); }
-    income+=s;
-  });
-  db.accounts.filter(a=>a.type==='Expense').forEach(a=>{
-    let s=0; txs.forEach(t=>t.lines.forEach(l=>{ if(l.account===a.name){ s += (l.debit||0) - (l.credit||0); }}));
-    if(Math.abs(s)>0.0001){ const tr=document.createElement('tr'); tr.innerHTML=`<td>${a.name}</td><td class="right">${fmt(s)}</td>`; plBody.appendChild(tr); }
-    expenses+=s;
-  });
-  $('#plNet').textContent=fmt(income - expenses);
-
-  // Balance sheet (as of "to")
-  const asOf = to || todayISO();
-  const bsBody=$('#bsTbl tbody'); bsBody.innerHTML='';
-  function addRow(lbl, amt){ const tr=document.createElement('tr'); tr.innerHTML=`<td>${lbl}</td><td class="right">${fmt(amt)}</td>`; bsBody.appendChild(tr); }
-  const assets = sumByType('Asset', asOf);
-  const liab = sumByType('Liability', asOf);
-  // Equity: compute from balances of equity accounts as of date
-  const equityAmt = db.accounts.filter(a=>a.type==='Equity').map(a=>accountBalance(a.name, asOf)).reduce((a,b)=>a+b,0);
-  addRow('Assets', assets);
-  addRow('Liabilities', liab);
-  addRow('Equity', equityAmt);
-  $('#bsCheck').textContent = fmt(assets - liab - equityAmt);
-}
+$('#clearFilter').onclick=()=>{ $('#fltText').value=''; $('#fltFrom').value=''; $('#fltTo').value=''; $('#fltType').value=''; refreshTransactions(); };
 
 /* ------------ Dashboard / Recent ------------ */
 function refreshDashboard(){
   $('#dashAssets').textContent = fmt(sumByType('Asset'));
   $('#dashLiabilities').textContent = fmt(sumByType('Liability'));
   $('#dashEquity').textContent = fmt(sumByType('Asset') - sumByType('Liability'));
-  // recent tx
   const tbody=$('#recentTbl tbody'); tbody.innerHTML='';
   const last = clone(db.transactions).sort((a,b)=> (a.date<b.date?1:-1)).slice(0,8);
   last.forEach(t=>tbody.appendChild(renderTxRow(t)));
 }
 
-/* ------------ Import / Export ------------ */
+/* ------------ Quick Add ------------ */
+$('#addQuickExpense').onclick=()=>{
+  const date=$('#qExpDate').value || todayISO();
+  const amt=parseFloat($('#qExpAmt').value||'0');
+  const from=$('#qExpFrom').value, to=$('#qExpTo').value;
+  const desc=$('#qExpDesc').value||'Expense';
+  if(!from||!to) return alert('Select accounts.');
+  if(!amt||amt<=0) return alert('Enter amount.');
+  const lines=[{account:to, debit:+amt.toFixed(2)},{account:from, credit:+amt.toFixed(2)}];
+  db.transactions.push({id:id(), date, type:'Expense', description:desc, lines});
+  saveDB(); refreshAll();
+  $('#qExpAmt').value=''; $('#qExpDesc').value='';
+};
+
+/* ------------ Transactions list & filters ------------ */
+function refreshTransactions(){
+  const tbody=$('#txTbl tbody'); tbody.innerHTML='';
+  const q=($('#fltText').value||'').toLowerCase();
+  const type=$('#fltType').value||'';
+  const from=$('#fltFrom').value||null;
+  const to=$('#fltTo').value||null;
+  clone(db.transactions)
+    .filter(t=> (!q || (t.description||'').toLowerCase().includes(q) || t.lines.some(l=>l.account.toLowerCase().includes(q))))
+    .filter(t=> (!type || (t.type||'')===type))
+    .filter(t=> (!from||t.date>=from)&&(!to||t.date<=to))
+    .sort((a,b)=> a.date<b.date?1:-1)
+    .forEach(t=>tbody.appendChild(renderTxRow(t)));
+  const rtbody=$('#recentTbl tbody'); if(rtbody){ rtbody.innerHTML=''; clone(db.transactions).sort((a,b)=> a.date<b.date?1:-1).slice(0,8).forEach(t=>rtbody.appendChild(renderTxRow(t))); }
+}
+
+/* ------------ Reports (personal) ------------ */
+function refreshReports(){
+  const from=$('#repFrom').value||null;
+  const to=$('#repTo').value||null;
+  const acct = $('#repAccount').value||'';
+
+  const txs = clone(db.transactions)
+    .filter(t=>(!from||t.date>=from)&&(!to||t.date<=to));
+
+  // Spending by category (Expense accounts): sum of debits - credits on Expense accounts
+  const spend = {};
+  txs.forEach(t=>{
+    t.lines.forEach(l=>{
+      const a = db.accounts.find(x=>x.name===l.account);
+      if(a && a.type==='Expense'){
+        spend[a.name] = (spend[a.name]||0) + (l.debit||0) - (l.credit||0);
+      }
+    });
+  });
+  const sBody=$('#spendTbl tbody'); sBody.innerHTML='';
+  let sTot=0;
+  Object.keys(spend).sort().forEach(k=>{
+    if(Math.abs(spend[k])>0.0001){
+      const tr=document.createElement('tr'); tr.innerHTML=`<td>${k}</td><td class="right">${fmt(spend[k])}</td>`;
+      sBody.appendChild(tr); sTot+=spend[k];
+    }
+  });
+  $('#spendTot').textContent=fmt(sTot);
+
+  // Income by category (Income accounts): credits - debits
+  const inc={};
+  txs.forEach(t=>{
+    t.lines.forEach(l=>{
+      const a = db.accounts.find(x=>x.name===l.account);
+      if(a && a.type==='Income'){
+        inc[a.name] = (inc[a.name]||0) + (l.credit||0) - (l.debit||0);
+      }
+    });
+  });
+  const iBody=$('#incTbl tbody'); iBody.innerHTML='';
+  let iTot=0;
+  Object.keys(inc).sort().forEach(k=>{
+    if(Math.abs(inc[k])>0.0001){
+      const tr=document.createElement('tr'); tr.innerHTML=`<td>${k}</td><td class="right">${fmt(inc[k])}</td>`;
+      iBody.appendChild(tr); iTot+=inc[k];
+    }
+  });
+  $('#incTot').textContent=fmt(iTot);
+
+  // Monthly Summary (last 12 months): per month totals
+  function ym(d){ return d.slice(0,7); }
+  const months = {};
+  // seed last 12 months keys
+  const now = new Date();
+  for(let i=11;i>=0;i--){
+    const dt = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const key = dt.toISOString().slice(0,7);
+    months[key] = {inc:0, exp:0};
+  }
+  db.transactions.forEach(t=>{
+    const key = ym(t.date);
+    if(!(key in months)) return;
+    t.lines.forEach(l=>{
+      const a=db.accounts.find(x=>x.name===l.account);
+      if(!a) return;
+      if(a.type==='Income'){ months[key].inc += (l.credit||0) - (l.debit||0); }
+      if(a.type==='Expense'){ months[key].exp += (l.debit||0) - (l.credit||0); }
+    });
+  });
+  const mBody=$('#monTbl tbody'); mBody.innerHTML='';
+  Object.keys(months).sort().forEach(k=>{
+    const incv=+(months[k].inc.toFixed(2)), expv=+(months[k].exp.toFixed(2));
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${k}</td><td class="right">${fmt(incv)}</td><td class="right">${fmt(expv)}</td><td class="right">${fmt(incv-expv)}</td>`;
+    mBody.appendChild(tr);
+  });
+
+  // Account Statement (running balance) for selected account within range
+  const stmtBody=$('#stmtTbl tbody'); stmtBody.innerHTML='';
+  if(acct){
+    const a = db.accounts.find(x=>x.name===acct);
+    if(a){
+      let balBefore = accountBalance(acct, from ? new Date(new Date(from).getTime()-86400000).toISOString().slice(0,10) : null);
+      let run = balBefore;
+      // gather lines
+      const rows=[];
+      db.transactions
+        .filter(t=>(!from||t.date>=from)&&(!to||t.date<=to))
+        .sort((a,b)=> a.date<b.date?-1:1)
+        .forEach(t=>{
+          t.lines.forEach(l=>{
+            if(l.account===acct){
+              const d=l.debit||0, c=l.credit||0;
+              if(a.type==='Asset'||a.type==='Expense') run += d - c;
+              else run += c - d;
+              rows.push({date:t.date, desc:t.description||'', d, c, run});
+            }
+          });
+        });
+      // opening row
+      const tr0=document.createElement('tr');
+      tr0.innerHTML=`<td>${from||'—'}</td><td>Opening Balance</td><td class="right"></td><td class="right"></td><td class="right">${fmt(balBefore)}</td>`;
+      stmtBody.appendChild(tr0);
+      rows.forEach(r=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${r.date}</td><td>${r.desc}</td><td class="right">${r.d?fmt(r.d):''}</td><td class="right">${r.c?fmt(r.c):''}</td><td class="right">${fmt(r.run)}</td>`;
+        stmtBody.appendChild(tr);
+      });
+    }
+  }
+
+  // Net Worth Trend (month-end for last 12 months)
+  const nwBody=$('#nwTbl tbody'); nwBody.innerHTML='';
+  for(let i=11;i>=0;i--){
+    const dt = new Date(now.getFullYear(), now.getMonth()-i+1, 0); // month end
+    const asOf = dt.toISOString().slice(0,10);
+    const assets = sumByType('Asset', asOf);
+    const liabs = sumByType('Liability', asOf);
+    const nw = assets - liabs;
+    const k = dt.toISOString().slice(0,7);
+    const tr=document.createElement('tr'); tr.innerHTML=`<td>${k}</td><td class="right">${fmt(nw)}</td>`;
+    nwBody.appendChild(tr);
+  }
+}
+
+/* ------------ Import / Export (JSON/CSV + Excel XML workbook) ------------ */
 function download(filename, content, type='text/plain'){
   const blob=new Blob([content],{type});
   const a=document.createElement('a');
@@ -710,19 +764,6 @@ function download(filename, content, type='text/plain'){
   a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 }
-$('#exportJSON').onclick=()=> download('ledger-backup.json', JSON.stringify(db,null,2), 'application/json');
-
-$('#exportCSV').onclick=()=>{
-  // accounts.csv
-  const acc = ['name,type', ...db.accounts.map(a=>`${csv(a.name)},${csv(a.type)}`)].join('\n');
-  download('accounts.csv', acc, 'text/csv');
-  // transactions.csv (flatten lines as JSON)
-  const tx = ['date,description,lines_json',
-    ...db.transactions.map(t=>`${csv(t.date)},${csv(t.description||'')},${csv(JSON.stringify(t.lines))}`)].join('\n');
-  download('transactions.csv', tx, 'text/csv');
-};
-function csv(s){ if(s==null) return ''; s=String(s); if(/[",\n]/.test(s)) return '"'+s.replace(/"/g,'""')+'"'; return s; }
-
 $('#importFile').onchange=(e)=>{
   const file=e.target.files[0]; if(!file) return;
   const name=file.name.toLowerCase();
@@ -737,17 +778,16 @@ $('#importFile').onchange=(e)=>{
         alert('Imported JSON backup.');
       }catch(err){ alert('Invalid JSON: '+err.message); }
     }else if(name.endsWith('.csv')){
-      // heuristic: if file has "lines_json", treat as transactions.csv, else accounts.csv
       if(text.toLowerCase().includes('lines_json')){
         const rows = parseCSV(text);
         const txs = [];
         for(const r of rows.slice(1)){
           if(!r) continue;
-          const [date, description, lines_json] = r;
+          const [date, description, lines_json, type] = r;
           if(!date) continue;
           let lines=[];
           try{ lines = JSON.parse(lines_json||'[]'); }catch{ lines=[]; }
-          txs.push({id:id(), date, description, lines});
+          txs.push({id:id(), date, type:type||'Other', description, lines});
         }
         db.transactions = txs;
         saveDB(); refreshAll();
@@ -760,12 +800,10 @@ $('#importFile').onchange=(e)=>{
           const [name, type] = r;
           if(name) accs.push({name, type:type||'Asset'});
         }
-        // Ensure Opening Equity exists
         if(!accs.some(a=>a.name==='Opening Equity')) accs.push({name:'Opening Equity', type:'Equity'});
         db.accounts = accs;
-        // keep transactions as-is (or clear? choose keep)
         saveDB(); refreshAll();
-        alert('Imported accounts from CSV (transactions left unchanged).');
+        alert('Imported accounts from CSV.');
       }
     }else{
       alert('Please import a .json or .csv file.');
@@ -774,21 +812,17 @@ $('#importFile').onchange=(e)=>{
   };
   reader.readAsText(file);
 };
-
 function parseCSV(text){
-  // simple CSV parser (supports quotes)
   const rows=[]; let row=[]; let i=0; let cur=''; let inQ=false;
   while(i<text.length){
     const ch=text[i];
     if(inQ){
-      if(ch==='"'){
-        if(text[i+1]==='"'){ cur+='"'; i++; }
-        else inQ=false;
-      }else cur+=ch;
+      if(ch==='"'){ if(text[i+1]==='"'){ cur+='"'; i++; } else inQ=false; }
+      else cur+=ch;
     }else{
       if(ch===','){ row.push(cur); cur=''; }
       else if(ch==='"'){ inQ=true; }
-      else if(ch==='\r'){ /* ignore */ }
+      else if(ch==='\r'){ }
       else if(ch==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; }
       else cur+=ch;
     }
@@ -797,7 +831,6 @@ function parseCSV(text){
   row.push(cur); rows.push(row);
   return rows;
 }
-
 $('#wipeAll').onclick=()=>{
   if(confirm('This will erase all accounts and transactions. Continue?')){
     db={meta:{created:new Date().toISOString(),version:1}, accounts:[{name:'Opening Equity', type:'Equity'}], transactions:[]};
@@ -805,76 +838,161 @@ $('#wipeAll').onclick=()=>{
   }
 };
 
-/* ------------ Quick Add ------------ */
-$('#addQuickExpense').onclick=()=>{
-  const date=$('#qExpDate').value || todayISO();
-  const amt=parseFloat($('#qExpAmt').value||'0');
-  const from=$('#qExpFrom').value, to=$('#qExpTo').value;
-  const desc=$('#qExpDesc').value||'Expense';
-  if(!from||!to) return alert('Select accounts.');
-  if(!amt||amt<=0) return alert('Enter amount.');
-  const lines=[{account:to, debit:+amt.toFixed(2)},{account:from, credit:+amt.toFixed(2)}];
-  db.transactions.push({id:id(), date, description:desc, lines});
-  saveDB(); refreshAll();
-  $('#qExpAmt').value=''; $('#qExpDesc').value='';
-};
+// Excel 2003 XML workbook (SpreadsheetML) export with multiple sheets
+$('#exportWorkbook').onclick=()=>{
+  const xmlSafe = s => (s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+  function ws(name, rows){
+    const cols = rows[0] ? rows[0].length : 0;
+    let data = `<Worksheet ss:Name="${xmlSafe(name)}"><Table>`;
+    for(const r of rows){
+      data += '<Row>';
+      for(const c of r){
+        const isNum = typeof c==='number' && isFinite(c);
+        if(isNum) data += `<Cell><Data ss:Type="Number">${c}</Data></Cell>`;
+        else data += `<Cell><Data ss:Type="String">${xmlSafe(c)}</Data></Cell>`;
+      }
+      data += '</Row>';
+    }
+    data += `</Table></Worksheet>`;
+    return data;
+  }
 
-$('#addSalary').onclick=()=>{
-  const date=$('#qSalDate').value || todayISO();
-  const amt=parseFloat($('#qSalAmt').value||'0');
-  const bank=$('#qSalBank').value;
-  if(!bank) return alert('Choose bank account.');
-  if(!amt||amt<=0) return alert('Enter amount.');
-  const p1n=$('#qSalPart1Name').value.trim()||'Salary Income';
-  const p1p=parseFloat($('#qSalPart1Pct').value||'100');
-  const p2n=$('#qSalPart2Name').value.trim();
-  const p2p=parseFloat($('#qSalPart2Pct').value||'0');
-  if(Math.abs((p1p+p2p)-100)>0.001) return alert('Split percentages must total 100%.');
-  // Ensure income accounts exist
-  if(p1n && !db.accounts.some(a=>a.name===p1n)){ db.accounts.push({name:p1n, type:'Income'}); }
-  if(p2n && !db.accounts.some(a=>a.name===p2n)){ db.accounts.push({name:p2n, type:'Income'}); }
-  const c1 = +(amt*(p1p/100)).toFixed(2);
-  const c2 = +(amt*(p2p/100)).toFixed(2);
-  const fixRound = +(amt - (c1+c2)).toFixed(2);
-  const lines=[{account:bank, debit:+amt.toFixed(2)}];
-  if(c1>0) lines.push({account:p1n, credit:c1});
-  if(c2>0) lines.push({account:p2n, credit:c2+fixRound});
-  db.transactions.push({id:id(), date, description:$('#qSalDesc').value||'Salary', lines});
-  saveDB(); refreshAll();
-  $('#qSalAmt').value=''; $('#qSalDesc').value='';
-};
+  // Build data for sheets
+  const accountsSheet = [['name','type','balance']].concat(
+    db.accounts.map(a=>[a.name,a.type, +accountBalance(a.name).toFixed(2)])
+  );
 
-/* ------------ Transactions list & filters ------------ */
-function refreshTransactions(){
-  const tbody=$('#txTbl tbody'); tbody.innerHTML='';
-  const q=($('#fltText').value||'').toLowerCase();
-  const from=$('#fltFrom').value||null;
-  const to=$('#fltTo').value||null;
-  clone(db.transactions)
-    .filter(t=> (!q || (t.description||'').toLowerCase().includes(q) || t.lines.some(l=>l.account.toLowerCase().includes(q))))
-    .filter(t=> (!from||t.date>=from)&&(!to||t.date<=to))
-    .sort((a,b)=> a.date<b.date?1:-1)
-    .forEach(t=>tbody.appendChild(renderTxRow(t)));
-  // recent (dashboard)
-  const rtbody=$('#recentTbl tbody'); if(rtbody){ rtbody.innerHTML=''; clone(db.transactions).sort((a,b)=> a.date<b.date?1:-1).slice(0,8).forEach(t=>rtbody.appendChild(renderTxRow(t))); }
-}
+  const transactionsSheet = [['date','description','type','lines_json']].concat(
+    db.transactions.map(t=>[t.date, t.description||'', t.type||'Other', JSON.stringify(t.lines)])
+  );
+
+  // Reports computed with current UI range (if any)
+  const from=$('#repFrom').value||'';
+  const to=$('#repTo').value||'';
+  const acct=$('#repAccount').value||'';
+
+  function inRange(t){ return (!from||t.date>=from)&&(!to||t.date<=to); }
+  const rtx = db.transactions.filter(inRange);
+
+  // Spending by Category
+  const spendMap={};
+  rtx.forEach(t=>t.lines.forEach(l=>{
+    const a=db.accounts.find(x=>x.name===l.account);
+    if(a && a.type==='Expense'){
+      spendMap[a.name]=(spendMap[a.name]||0)+(l.debit||0)-(l.credit||0);
+    }
+  }));
+  const spendSheet = [['Expense Category','Amount']].concat(
+    Object.keys(spendMap).sort().map(k=>[k, +spendMap[k].toFixed(2)])
+  );
+
+  // Income by Category
+  const incMap={};
+  rtx.forEach(t=>t.lines.forEach(l=>{
+    const a=db.accounts.find(x=>x.name===l.account);
+    if(a && a.type==='Income'){
+      incMap[a.name]=(incMap[a.name]||0)+(l.credit||0)-(l.debit||0);
+    }
+  }));
+  const incomeSheet = [['Income Category','Amount']].concat(
+    Object.keys(incMap).sort().map(k=>[k, +incMap[k].toFixed(2)])
+  );
+
+  // Monthly Summary (last 12 months)
+  const now=new Date();
+  function ym(d){return d.slice(0,7);}
+  const months={};
+  for(let i=11;i>=0;i--){ const dt=new Date(now.getFullYear(),now.getMonth()-i,1); months[dt.toISOString().slice(0,7)]={inc:0,exp:0}; }
+  db.transactions.forEach(t=>{
+    const k=ym(t.date); if(!(k in months)) return;
+    t.lines.forEach(l=>{
+      const a=db.accounts.find(x=>x.name===l.account);
+      if(!a) return;
+      if(a.type==='Income') months[k].inc += (l.credit||0)-(l.debit||0);
+      if(a.type==='Expense') months[k].exp += (l.debit||0)-(l.credit||0);
+    });
+  });
+  const monthlySheet = [['Month','Income','Expenses','Net']].concat(
+    Object.keys(months).sort().map(k=>{
+      const inc=+months[k].inc.toFixed(2); const exp=+months[k].exp.toFixed(2);
+      return [k, inc, exp, +(inc-exp).toFixed(2)];
+    })
+  );
+
+  // Account Statement
+  const stmtRows = [['Date','Description','Debit','Credit','Running Balance']];
+  if(acct){
+    const a=db.accounts.find(x=>x.name===acct);
+    let balBefore = accountBalance(acct, from ? new Date(new Date(from).getTime()-86400000).toISOString().slice(0,10) : null);
+    let run=balBefore;
+    stmtRows.push([from||'', 'Opening Balance', '', '', +balBefore.toFixed(2)]);
+    db.transactions.filter(inRange).sort((x,y)=>x.date<y.date?-1:1).forEach(t=>{
+      t.lines.forEach(l=>{
+        if(l.account===acct){
+          const d=l.debit||0, c=l.credit||0;
+          if(a.type==='Asset'||a.type==='Expense') run += d - c; else run += c - d;
+          stmtRows.push([t.date, t.description||'', d?+d.toFixed(2):'', c?+c.toFixed(2):'', +run.toFixed(2)]);
+        }
+      });
+    });
+  }else{
+    stmtRows.push(['(select an account in the Reports page and export again)','', '', '', '']);
+  }
+
+  // Net Worth Trend (month-end, last 12)
+  const nwRows=[['Month','Net Worth']];
+  for(let i=11;i>=0;i--){
+    const dt=new Date(now.getFullYear(), now.getMonth()-i+1, 0);
+    const asOf = dt.toISOString().slice(0,10);
+    const assets = sumByType('Asset', asOf);
+    const liabs = sumByType('Liability', asOf);
+    nwRows.push([dt.toISOString().slice(0,7), +(assets-liabs).toFixed(2)]);
+  }
+
+  // Full Ledger (flattened)
+  const ledgerRows=[['Date','Description','Type','Account','Debit','Credit','AccountType']];
+  db.transactions.forEach(t=>{
+    t.lines.forEach(l=>{
+      const a=db.accounts.find(x=>x.name===l.account)||{type:''};
+      ledgerRows.push([t.date, t.description||'', t.type||'', l.account, l.debit?+(+l.debit).toFixed(2):'', l.credit?+(+l.credit).toFixed(2):'', a.type]);
+    });
+  });
+
+  const workbook =
+`<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <Author>Personal Ledger</Author><Created>${new Date().toISOString()}</Created>
+ </DocumentProperties>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <ProtectStructure>False</ProtectStructure><ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ ${ws('Accounts', accountsSheet)}
+ ${ws('Transactions', transactionsSheet)}
+ ${ws('SpendingByCategory', spendSheet)}
+ ${ws('IncomeByCategory', incomeSheet)}
+ ${ws('MonthlySummary', monthlySheet)}
+ ${ws('AccountStatement', stmtRows)}
+ ${ws('NetWorthTrend', nwRows)}
+ ${ws('FullLedger', ledgerRows)}
+</Workbook>`;
+  download('PersonalLedger.xlsx.xml', workbook, 'application/xml');
+};
 
 /* ------------ Global refresh ------------ */
 function refreshAll(){
   refreshAccounts();
-  // set defaults in editor if empty
   if($('#entryTbl tbody').children.length===0){ for(let i=0;i<2;i++) addEntryRow(emptyLine()); computeEntryTotals(); }
   refreshTransactions();
-  refreshReports();
   refreshDashboard();
-  // default dates
+  refreshReports();
   if(!$('#qExpDate').value) $('#qExpDate').value=todayISO();
-  if(!$('#qSalDate').value) $('#qSalDate').value=todayISO();
   if(!$('#txDate').value) $('#txDate').value=todayISO();
-  // populate selects for quick sections happens in refreshAccounts
 }
 refreshAll();
-
 </script>
 </body>
 </html>
